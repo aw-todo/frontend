@@ -1,13 +1,178 @@
-<script setup lang="ts">
+<script setup>
+import { reactive, ref } from "vue";
+import Button from "primevue/button";
+import Dialog from "primevue/dialog";
+import InputText from "primevue/inputtext";
+
 const divStyle = {
   height: "80vh",
+  overflowY: "auto",
 };
+
+const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
+
+// 현재 날짜 가져오기
+const today = new Date();
+
+// 주의 시작일 계산 (일요일 기준)
+const startOfWeek = new Date(today);
+startOfWeek.setDate(today.getDate() - today.getDay()); // 일요일
+
+// 요일별 날짜 매핑
+const datesOfWeek = [];
+for (let i = 0; i < 7; i++) {
+  const date = new Date(startOfWeek);
+  date.setDate(startOfWeek.getDate() + i);
+  datesOfWeek.push(date);
+}
+
+// 일정 데이터 초기화
+const plans = reactive({});
+
+// 각 날짜별로 일정 배열 초기화
+datesOfWeek.forEach((date) => {
+  plans[date.toDateString()] = []; // 초기화
+});
+
+// 예시 데이터 추가
+plans[datesOfWeek[1].toDateString()].push("회의");
+plans[datesOfWeek[3].toDateString()].push("프로젝트 마감");
+plans[datesOfWeek[5].toDateString()].push("팀 빌딩 행사");
+
+// 플랜 추가 함수
+const addPlan = (date) => {
+  const plan = prompt(
+    `${date.getMonth() + 1}월 ${date.getDate()}일의 플랜을 입력하세요:`,
+  );
+  if (plan) {
+    plans[date.toDateString()].push(plan);
+  }
+};
+const dialogVisible = ref(false);
+const newPlan = ref("");
+let selectedDate = null;
+
+function openDialog(date) {
+  selectedDate = date;
+  newPlan.value = "";
+  dialogVisible.value = true;
+}
+
+function confirmAddPlan() {
+  if (newPlan.value.trim()) {
+    plans[selectedDate.toDateString()].push(newPlan.value.trim());
+  }
+  dialogVisible.value = false;
+}
 </script>
 
 <template>
-  <div class="p-3 overflow-auto" :style="divStyle">
-    <p>Daily Plans</p>
+  <div class="p-3" :style="divStyle">
+    <div class="row h-100 no-gutters">
+      <div
+        class="col d-flex flex-column align-items-center justify-content-start"
+        v-for="(day, index) in daysOfWeek"
+        :key="index"
+        :class="{ 'border-right': index !== daysOfWeek.length - 1 }"
+      >
+        <span class="day-label mb-1">{{ day }}</span>
+        <span class="date-label mb-2"
+          >{{ datesOfWeek[index].getDate() }}일</span
+        >
+        <!-- 날짜 밑에 선 추가 -->
+        <div class="w-100 border-bottom mb-2"></div>
+        <!-- 일정 목록 -->
+        <ul class="list-unstyled w-100">
+          <li
+            v-for="(plan, idx) in plans[datesOfWeek[index].toDateString()]"
+            :key="idx"
+            class="text-center py-1 px-2"
+          >
+            {{ plan }}
+          </li>
+        </ul>
+        <!-- 플랜 추가 버튼 -->
+        <Button
+          class="btn btn-sm btn-primary mb-2"
+          @click="addPlan(datesOfWeek[index])"
+        >
+          플랜 추가
+        </Button>
+      </div>
+    </div>
+    <Dialog v-model:visible="dialogVisible" header="계획 추가">
+      <div class="p-fluid">
+        <div class="field">
+          <label for="plan">플랜 내용</label>
+          <InputText id="plan" v-model="newPlan" />
+        </div>
+      </div>
+      <template #footer>
+        <Button
+          label="취소"
+          icon="pi pi-times"
+          @click="dialogVisible = false"
+          class="p-button-text"
+        />
+        <Button label="추가" icon="pi pi-check" @click="confirmAddPlan" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.border-right {
+  border-right: 1px solid #dee2e6;
+}
+
+.row.no-gutters {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.row.no-gutters > [class*="col-"] {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.list-unstyled {
+  padding-left: 0;
+  list-style: none;
+}
+
+.col {
+  padding-top: 1rem;
+}
+
+.day-label {
+  font-size: 0.9rem;
+  color: gray;
+  font-weight: bold;
+  text-align: center;
+}
+
+.date-label {
+  font-size: 1.5rem;
+  color: black;
+  text-align: center;
+}
+
+.col > ul > li {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.col > ul > li:first-child {
+  border-top: none;
+}
+
+/* 버튼이 아래쪽에 위치하도록 */
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+</style>
