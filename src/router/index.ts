@@ -1,10 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
+import MainPage from "../views/MainPage.vue";
 
 // 라우트 정의
 const routes = [
   {
     path: "/",
+    redirect: "/weekly-todo",
+  },
+  {
+    path: "/weekly-todo",
     name: "MainPage",
+    component: MainPage,
   },
 ];
 

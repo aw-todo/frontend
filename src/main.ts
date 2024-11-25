@@ -1,5 +1,5 @@
 import { createApp } from "vue";
-import "./assets/style.css";
+// import "./assets/style.css";
 import App from "./App.vue";
 import router from "./router";
 import PrimeVue from "primevue/config";
@@ -19,5 +19,6 @@ app
     },
   })
   .use(pinia)
-  .use(axios)
   .mount("#app");
+
+app.config.globalProperties.axios = axios;
