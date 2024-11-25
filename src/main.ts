@@ -7,6 +7,7 @@ import Aura from "@primevue/themes/aura";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { createPinia } from "pinia";
+import axios from "axios";
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -18,4 +19,5 @@ app
     },
   })
   .use(pinia)
+  .use(axios)
   .mount("#app");
