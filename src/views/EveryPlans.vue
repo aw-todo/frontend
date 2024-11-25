@@ -38,7 +38,7 @@ const togglePlanDone = (id: number) => {
 </script>
 
 <template>
-  <aside class="big-plans">
+  <div class="big-plans">
     <h2 class="section-title">이번 주 계획</h2>
     <ul class="plan-list">
       <li
@@ -64,7 +64,7 @@ const togglePlanDone = (id: number) => {
         <CreatePlan />
       </template>
     </ConfirmDialog>
-  </aside>
+  </div>
 </template>
 
 <style scoped>

@@ -1,10 +1,8 @@
 <script setup lang="ts">
 
-// TODO 화면 꽉채우기
-
 import { ref } from "vue";
 
-const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] ;
 
 // 요일별 계획 데이터
 const dailyPlans = ref(
@@ -45,7 +43,7 @@ const addPlan = (dayIndex: number) => {
 /* 전체 일별 계획 영역 */
 .daily-plans {
   display: flex;
-  flex: 1; /* 남은 공간을 모두 차지 */
+  flex: 8;
 }
 
 .day-column {
