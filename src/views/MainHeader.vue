@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useWeekStore } from "../stores/weekStore";
-import Button from "primevue/button";
+import "primeicons/primeicons.css";
 
 const weekStore = useWeekStore();
 
@@ -37,26 +37,27 @@ function nextWeek() {
 </script>
 
 <template>
-  <header
-    class="main-header d-flex flex-column align-items-center justify-content-center position-relative"
-    style="height: 20vh"
-  >
-    <!-- 주차 이동 버튼 -->
-    <div
-      class="navigation-buttons position-absolute w-100 d-flex justify-content-between px-3"
-    >
-      <Button class="btn btn-link text-white" @click="previousWeek">
-        <i class="pi pi-chevron-left"></i>
-      </Button>
-      <Button class="btn btn-link text-white" @click="nextWeek">
-        <i class="pi pi-chevron-right"></i>
-      </Button>
-    </div>
+  <header class="main-header position-relative" style="height: 20vh">
     <!-- 날짜 정보 표시 -->
-    <div class="date-info">
+    <div class="date-info text-center">
       {{ currentYear }}년 {{ currentMonth }}월 {{ currentWeek }}주차
     </div>
-    <h1>TODO Planner</h1>
+
+    <!-- 주차 이동 버튼과 제목을 함께 배치 -->
+    <div class="d-flex align-items-center justify-content-center">
+      <!-- 이전 주 버튼 -->
+      <button class="btn btn-link text-white p-0" @click="previousWeek">
+        <i class="pi pi-angle-left"></i>
+      </button>
+
+      <!-- 제목 텍스트 -->
+      <h1 class="mx-3 my-0">TODO Planner</h1>
+
+      <!-- 다음 주 버튼 -->
+      <button class="btn btn-link text-white p-0" @click="nextWeek">
+        <i class="pi pi-angle-right"></i>
+      </button>
+    </div>
   </header>
 </template>
 
@@ -64,21 +65,23 @@ function nextWeek() {
 .main-header {
   background-color: #007bff;
   color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   position: relative;
 }
 
 .date-info {
-  position: absolute;
-  top: 10px;
-  font-size: 0.8rem;
-}
-
-.navigation-buttons {
-  top: 0;
-  height: 100%;
+  font-size: 1.1rem;
 }
 
 h1 {
   margin: 0;
+}
+
+.btn-link {
+  font-size: 1.5rem;
+  padding: 0;
 }
 </style>
