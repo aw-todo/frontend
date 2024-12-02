@@ -1,43 +1,53 @@
-<script setup>
-import { reactive, ref } from "vue";
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
+import { useWeekStore } from "@/stores/weekStore.ts";
 
 const divStyle = {
   height: "80vh",
   overflowY: "auto",
 };
 
+const weekStore = useWeekStore();
+
+// 현재 날짜 및 주차 정보 가져오기
+const currentDate = computed(() => weekStore.currentDate);
+
+// 요일 배열
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
 
-// 현재 날짜 가져오기
-const today = new Date();
-
 // 주의 시작일 계산 (일요일 기준)
-const startOfWeek = new Date(today);
-startOfWeek.setDate(today.getDate() - today.getDay()); // 일요일
+const startOfWeek = computed(() => {
+  const date = new Date(currentDate.value);
+  date.setDate(date.getDate() - date.getDay());
+  return date;
+});
 
 // 요일별 날짜 매핑
-const datesOfWeek = [];
-for (let i = 0; i < 7; i++) {
-  const date = new Date(startOfWeek);
-  date.setDate(startOfWeek.getDate() + i);
-  datesOfWeek.push(date);
-}
+const datesOfWeek = computed(() => {
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(startOfWeek.value);
+    date.setDate(startOfWeek.value.getDate() + i);
+    dates.push(date);
+  }
+  return dates;
+});
 
 // 일정 데이터 초기화
 const plans = reactive({});
 
 // 각 날짜별로 일정 배열 초기화
-datesOfWeek.forEach((date) => {
-  plans[date.toDateString()] = []; // 초기화
-});
-
-// 예시 데이터 추가
-plans[datesOfWeek[1].toDateString()].push("회의");
-plans[datesOfWeek[3].toDateString()].push("프로젝트 마감");
-plans[datesOfWeek[5].toDateString()].push("팀 빌딩 행사");
+function initializePlans() {
+  datesOfWeek.value.forEach((date) => {
+    const key = date.toDateString();
+    if (!plans[key]) {
+      plans[key] = []; // 초기화
+    }
+  });
+}
 
 // 플랜 추가 함수
 const addPlan = (date) => {
@@ -48,6 +58,7 @@ const addPlan = (date) => {
     plans[date.toDateString()].push(plan);
   }
 };
+
 const dialogVisible = ref(false);
 const newPlan = ref("");
 let selectedDate = null;
@@ -64,6 +75,22 @@ function confirmAddPlan() {
   }
   dialogVisible.value = false;
 }
+
+onMounted(() => {
+  // 컴포넌트가 마운트될 때 초기화
+  initializePlans();
+});
+
+// 주차 정보 변경 시 업데이트
+watch(
+  () => weekStore.currentDate,
+  () => {
+    initializePlans();
+  },
+);
+
+// 오늘 날짜 계산
+const today = computed(() => new Date());
 </script>
 
 <template>
