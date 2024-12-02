@@ -1,13 +1,39 @@
 <script setup lang="ts">
-import { defineProps } from "vue";
+import { defineProps, onMounted, ref } from "vue";
 import Button from "primevue/button";
+import { DailyPlanType } from "@/type/plan_type.ts";
+import Dialog from "primevue/dialog";
+import InputText from "primevue/inputtext";
 
 const props = defineProps({
   day: String,
   date: Date,
   plans: Array,
   isToday: Boolean,
-  addPlan: Function,
+});
+
+const dailyPlans = ref<DailyPlanType[]>([]);
+
+// 플랜 추가 함수
+const dialogVisible = ref(false);
+const newPlan = ref("");
+let selectedDate = null;
+
+function addPlan(date) {
+  selectedDate = date;
+  newPlan.value = "";
+  dialogVisible.value = true;
+}
+
+function confirmAddPlan() {
+  if (newPlan.value.trim()) {
+    dailyPlans.value[selectedDate.toDateString()].push(newPlan.value.trim());
+  }
+  dialogVisible.value = false;
+}
+
+onMounted(() => {
+  dailyPlans.value = props.plans;
 });
 </script>
 
@@ -30,6 +56,18 @@ const props = defineProps({
     <Button class="btn btn-sm btn-primary mb-2" @click="addPlan(date)">
       플랜 추가
     </Button>
+    <!-- 플랜 추가 다이얼로그 -->
+    <Dialog v-model:visible="dialogVisible" header="계획 추가" :modal="true">
+      <div class="p-fluid">
+        <div class="field">
+          <label for="plan" class="me-2">내용</label>
+          <InputText id="plan" v-model="newPlan" />
+        </div>
+      </div>
+      <template #footer>
+        <Button label="추가" icon="pi pi-check" @click="confirmAddPlan" />
+      </template>
+    </Dialog>
   </div>
 </template>
 

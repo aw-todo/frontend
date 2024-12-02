@@ -2,9 +2,6 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useWeekStore } from "@/stores/weekStore.ts";
 import DailyPlan from "@/views/DailyPlan.vue";
-import Dialog from "primevue/dialog";
-import InputText from "primevue/inputtext";
-import Button from "primevue/button";
 
 const divStyle = {
   height: "80vh",
@@ -50,24 +47,6 @@ function initializePlans() {
   });
 }
 
-// 플랜 추가 함수
-const dialogVisible = ref(false);
-const newPlan = ref("");
-let selectedDate = null;
-
-function addPlan(date) {
-  selectedDate = date;
-  newPlan.value = "";
-  dialogVisible.value = true;
-}
-
-function confirmAddPlan() {
-  if (newPlan.value.trim()) {
-    dailyPlans.value[selectedDate.toDateString()].push(newPlan.value.trim());
-  }
-  dialogVisible.value = false;
-}
-
 onMounted(() => {
   // 컴포넌트가 마운트될 때 초기화
   initializePlans();
@@ -99,27 +78,8 @@ const today = computed(() => {
         :date="datesOfWeek[index]"
         :plans="dailyPlans[datesOfWeek[index].toDateString()]"
         :isToday="datesOfWeek[index].toDateString() === today.toDateString()"
-        :addPlan="addPlan"
       />
     </div>
-    <!-- 플랜 추가 다이얼로그 -->
-    <Dialog v-model:visible="dialogVisible" header="계획 추가">
-      <div class="p-fluid">
-        <div class="field">
-          <label for="plan">플랜 내용</label>
-          <InputText id="plan" v-model="newPlan" />
-        </div>
-      </div>
-      <template #footer>
-        <Button
-          label="취소"
-          icon="pi pi-times"
-          @click="dialogVisible = false"
-          class="p-button-text"
-        />
-        <Button label="추가" icon="pi pi-check" @click="confirmAddPlan" />
-      </template>
-    </Dialog>
   </div>
 </template>
 
