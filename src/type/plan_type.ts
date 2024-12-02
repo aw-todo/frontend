@@ -2,7 +2,7 @@ export interface PlanType {
   content: string;
 }
 
-export interface WeeklyPlanType extends PlanType {
+export interface WeeklyTargetType extends PlanType {
   colors: string;
   childPlans: PlanType[] | null;
 }
