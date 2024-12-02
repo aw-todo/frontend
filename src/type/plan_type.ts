@@ -1,12 +1,15 @@
 export interface PlanType {
-  color: string;
   content: string;
 }
 
 export interface WeeklyPlanType extends PlanType {
+  colors: string;
   childPlans: PlanType[] | null;
 }
 
 export interface DailyPlanType extends PlanType {
-  parentPlans: number | null;
+  parentPlan: {
+    id: number;
+    colors: string;
+  } | null;
 }
