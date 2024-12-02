@@ -6,7 +6,7 @@ import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import ColorPicker from "primevue/colorpicker";
-import { WeeklyPlanType } from "@/type/plan_type.ts";
+import { WeeklyTargetType } from "@/type/plan_type.ts";
 
 const divStyle = {
   minHeight: "30vh",
@@ -39,7 +39,7 @@ function getWeekNumberInMonth(date) {
   }
 }
 
-const weeklyPlans = ref<WeeklyPlanType[]>([]);
+const weeklyPlans = ref<WeeklyTargetType[]>([]);
 
 const editDialogVisible = ref(false);
 const editedColor = ref("#000000");
@@ -55,11 +55,11 @@ const dialogHeader = computed(() => {
   return "";
 });
 
-const childrenPlans = ref<WeeklyPlanType[]>([]);
+const childrenPlans = ref<WeeklyTargetType[]>([]);
 
 function openDialog(
   state: string,
-  plan: WeeklyPlanType | null = null,
+  plan: WeeklyTargetType | null = null,
   index: number | null = null,
 ) {
   dialogState.value = state;
