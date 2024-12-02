@@ -15,6 +15,7 @@
     "path": "^0.12.7",
     "pinia": "^2.2.6",
     "prettier": "^3.3.3",
+    "primeicons": "^7.0.0",
     "primevue": "^4.2.3",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"
