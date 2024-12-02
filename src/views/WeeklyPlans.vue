@@ -39,7 +39,7 @@ function getWeekNumberInMonth(date) {
   }
 }
 
-const everyPlans = ref<WeeklyPlanType>([]);
+const weeklyPlans = ref<WeeklyPlanType[]>([]);
 
 const editDialogVisible = ref(false);
 const editedColor = ref("#000000");
@@ -83,10 +83,10 @@ function updatePlan() {
     };
     if (dialogState.value === "create") {
       // 맨 위에 새로운 플랜 추가
-      everyPlans.value.push(planData);
+      weeklyPlans.value.push(planData);
     } else if (dialogState.value === "edit") {
       // 해당 인덱스의 플랜 수정
-      everyPlans.value.splice(editedIndex.value, 1, planData);
+      weeklyPlans.value.splice(editedIndex.value, 1, planData);
     }
     editDialogVisible.value = false;
   } else {
@@ -95,14 +95,14 @@ function updatePlan() {
 }
 
 onMounted(() => {
-  everyPlans.value = [
+  weeklyPlans.value = [
     { color: "#003213", content: "hi" },
     { color: "#633213", content: "im" },
   ];
 });
 
 watch(currentWeek, () => {
-  everyPlans.value = [
+  weeklyPlans.value = [
     { color: "#633213", content: "im" },
     { color: "#003213", content: "yonghan" },
   ];
@@ -126,7 +126,7 @@ watch(currentWeek, () => {
     <ul class="list-group">
       <li
         class="list-group-item d-flex justify-content-between align-items-center"
-        v-for="(plan, index) in everyPlans"
+        v-for="(plan, index) in weeklyPlans"
         :key="index"
       >
         <ColorPicker v-model="plan.color" disabled />
