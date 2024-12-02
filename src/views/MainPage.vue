@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MainHeader from "@/views/MainHeader.vue";
-import EveryPlans from "@/views/EveryPlans.vue";
+import EveryPlans from "@/views/WeeklyPlans.vue";
 import DailyPlans from "@/views/DailyPlans.vue";
 </script>
 
