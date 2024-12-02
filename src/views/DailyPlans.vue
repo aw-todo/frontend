@@ -67,13 +67,16 @@ function confirmAddPlan() {
 </script>
 
 <template>
-  <div class="p-3" :style="divStyle">
+  <div :style="divStyle">
     <div class="row h-100 no-gutters">
       <div
-        class="col d-flex flex-column align-items-center justify-content-start"
+        class="col d-flex flex-column align-items-center justify-content-start border-left border-right"
         v-for="(day, index) in daysOfWeek"
         :key="index"
-        :class="{ 'border-right': index !== daysOfWeek.length - 1 }"
+        :class="{
+          'today-column':
+            datesOfWeek[index].toDateString() === today.toDateString(),
+        }"
       >
         <span class="day-label mb-1">{{ day }}</span>
         <span class="date-label mb-2"
@@ -121,6 +124,10 @@ function confirmAddPlan() {
 </template>
 
 <style scoped>
+.border-left {
+  border-left: 1px solid #dee2e6;
+}
+
 .border-right {
   border-right: 1px solid #dee2e6;
 }
@@ -142,6 +149,8 @@ function confirmAddPlan() {
 
 .col {
   padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .day-label {
@@ -166,13 +175,13 @@ function confirmAddPlan() {
   border-top: none;
 }
 
-/* 버튼이 아래쪽에 위치하도록 */
-.col {
-  display: flex;
-  flex-direction: column;
+/* 호버 효과 추가 */
+.col:hover {
+  background-color: #f9f9f9;
 }
 
-.flex-grow-1 {
-  flex-grow: 1;
+/* 오늘 날짜 강조 */
+.col.today-column {
+  border: 3px solid #007bff;
 }
 </style>
