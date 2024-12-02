@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MainHeader from "@/views/MainHeader.vue";
-import EveryPlans from "@/views/WeeklyPlans.vue";
-import DailyPlans from "@/views/DailyPlans.vue";
+import EveryPlans from "@/views/WeeklyTargets.vue";
+import DailyPlans from "@/views/WeeklyPlans.vue";
 </script>
 
 <template>
