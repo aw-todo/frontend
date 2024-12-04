@@ -8,6 +8,7 @@ import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { createPinia } from "pinia";
 import axios from "axios";
+import ToastService from "primevue/toastservice";
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -19,6 +20,7 @@ app
     },
   })
   .use(pinia)
+  .use(ToastService)
   .mount("#app");
 
 app.config.globalProperties.axios = axios;

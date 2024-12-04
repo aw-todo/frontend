@@ -4,18 +4,13 @@ export interface PlanType {
   text: string;
   startDate: string;
   endDate: string;
+  color: string;
   created_at: string;
   priority: string;
   done: boolean;
+  parentPlan: PlanType;
 }
 
-export interface WeeklyTargetType extends PlanType {
-  colors: string;
-}
+export interface WeeklyTargetType extends PlanType {}
 
-export interface DailyPlanType extends PlanType {
-  parentPlan: {
-    id: number;
-    colors: string;
-  } | null;
-}
+export interface DailyPlanType extends PlanType {}
