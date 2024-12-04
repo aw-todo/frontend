@@ -1,4 +1,5 @@
 import { apiClient } from "./apiClients.ts";
+import { PlanType } from "../type/plan_type.ts";
 
 export class PlanService {
   private static instance: PlanService;
@@ -20,14 +21,34 @@ export class PlanService {
         endDate: endDate,
       },
     };
-    const url = "/plans";
+    const url = "/plan";
     return apiClient.get(url, data);
   }
 
   async updatePlanStatus(planId: number) {
-    const url = `/plans/change/status`;
+    const url = `/plan/change/status`;
     const data = {
       planId: planId,
+    };
+    return apiClient.post(url, data);
+  }
+
+  async createNewPlan(planData: any) {
+    const url = `/plan/create`;
+    const data = {
+      title: planData.title,
+      text: planData.text,
+      parent_id: planData.parent_id,
+    };
+    return apiClient.post(url, data);
+  }
+
+  async updatePlan(planData: any) {
+    const url = `/plan/update`;
+    const data = {
+      title: planData.title,
+      text: planData.text,
+      parent_id: planData.parent_id,
     };
     return apiClient.post(url, data);
   }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, defineProps, onMounted, ref } from "vue";
 import Button from "primevue/button";
-import { DailyPlanType } from "@/type/plan_type.ts";
+import { DailyPlanType, WeeklyTargetType } from "@/type/plan_type.ts";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import ColorPicker from "primevue/colorpicker";
@@ -10,6 +10,7 @@ import Checkbox from "primevue/checkbox";
 import { usePlanStore } from "@/stores/planStore.ts";
 import { PlanService } from "@/service/PlanService.ts";
 import { HttpStatusCode } from "@/enum/httpStatusCode.ts";
+import { usePlanState } from "@/composables/usePlanState.ts";
 
 const props = defineProps({
   day: String,
@@ -22,29 +23,51 @@ const planStore = usePlanStore();
 
 const dailyPlans = ref<DailyPlanType[]>([]);
 
-const selectedTarget = ref({});
+const selectedTarget = ref<WeeklyTargetType>({});
 const currentWeeklyTargets = computed(() => planStore.getCurrentWeeklyTargets);
 
-// 플랜 추가 함수
-const dialogVisible = ref(false);
-const newPlan = ref("");
-let selectedDate = null;
-
-function addPlan(date) {
-  selectedDate = date;
-  newPlan.value = "";
-  dialogVisible.value = true;
-}
-
-function confirmAddPlan() {
-  if (newPlan.value.trim()) {
-    dailyPlans.value[selectedDate.toDateString()].push(newPlan.value.trim());
-  }
-  dialogVisible.value = false;
-}
+const {
+  editDialogVisible,
+  editedTitle,
+  editedText,
+  editedColor,
+  editedIndex,
+  dialogState,
+  dialogHeader,
+  openDialog,
+} = usePlanState();
 
 function onDialogHide() {
   selectedTarget.value = {};
+}
+
+async function updatePlan() {
+  if (editedTitle.value.trim()) {
+    const planData = {
+      title: editedTitle.value.trim(),
+      text: editedText.value.trim(),
+      parent_id: selectedTarget.value.id,
+    };
+    // TODO 아래 두 추가, 수정 부분을 API 통신으로 바꾸고, 재호출하는 방식으로 수정
+    if (dialogState.value === "create") {
+      // 맨 위에 새로운 플랜 추가
+      // dailyPlans.value.push(planData);
+      const response = await PlanService.getInstance().createNewPlan(planData);
+      if (response === HttpStatusCode.HTTP_200_OK) {
+        // 재호출 project <-> inject
+      }
+    } else if (dialogState.value === "edit") {
+      // 해당 인덱스의 플랜 수정
+      // dailyPlans.value.splice(editedIndex.value, 1, planData);
+      const response = await PlanService.getInstance().updatePlan(planData);
+      if (response === HttpStatusCode.HTTP_200_OK) {
+        // 재호출 project <-> inject
+      }
+    }
+    editDialogVisible.value = false;
+  } else {
+  }
+  editedColor.value = "#000000";
 }
 
 async function togglePlanDone(plan) {
@@ -71,6 +94,7 @@ async function togglePlanDone(plan) {
 onMounted(() => {
   dailyPlans.value = props.plans;
   console.log(dailyPlans.value);
+  console.log(planStore.getCurrentWeeklyTargets);
 });
 </script>
 
@@ -86,8 +110,8 @@ onMounted(() => {
     <!-- 일정 목록 -->
     <ul class="list-unstyled w-100">
       <li
-        v-for="(plan, idx) in dailyPlans"
-        :key="idx"
+        v-for="(plan, index) in dailyPlans"
+        :key="index"
         class="text-center py-1 px-2 d-flex align-items-center justify-content-between"
       >
         <Checkbox
@@ -108,19 +132,19 @@ onMounted(() => {
       </li>
     </ul>
     <!-- 플랜 추가 버튼 -->
-    <Button class="btn btn-sm btn-primary mb-2" @click="addPlan(date)">
+    <Button class="btn btn-sm btn-primary mb-2" @click="openDialog('create')">
       플랜 추가
     </Button>
     <!-- 플랜 추가 다이얼로그 -->
     <Dialog
-      v-model:visible="dialogVisible"
-      header="계획 추가"
+      v-model:visible="editDialogVisible"
+      :header="dialogHeader"
       :modal="true"
       @hide="onDialogHide"
     >
       <div class="p-fluid pb-3">
         <div class="field">
-          <label for="plan" class="me-2">구분</label>
+          <label for="plan" class="me-2">구분 :</label>
           <Select v-model="selectedTarget" :options="currentWeeklyTargets">
             <template #value="slotProps">
               <div
@@ -149,14 +173,26 @@ onMounted(() => {
           </Select>
         </div>
       </div>
+      <div class="p-fluid pb-3">
+        <div class="field">
+          <label for="plan-title" class="me-2">제목 :</label>
+          <InputText id="plan-title" v-model="editedTitle" />
+        </div>
+      </div>
       <div class="p-fluid">
         <div class="field">
-          <label for="plan" class="me-2">내용</label>
-          <InputText id="plan" v-model="newPlan" />
+          <label for="plan-text" class="me-2">내용 :</label>
+          <InputText id="plan-text" v-model="editedText" />
         </div>
       </div>
       <template #footer>
-        <Button label="추가" icon="pi pi-check" @click="confirmAddPlan" />
+        <Button
+          v-if="dialogState === 'create'"
+          label="저장"
+          icon="pi pi-check"
+          @click="updatePlan"
+        />
+        <Button v-else label="수정" icon="pi pi-check" @click="updatePlan" />
       </template>
     </Dialog>
   </div>

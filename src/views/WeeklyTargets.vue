@@ -8,6 +8,7 @@ import InputText from "primevue/inputtext";
 import ColorPicker from "primevue/colorpicker";
 import { WeeklyTargetType } from "@/type/plan_type.ts";
 import { usePlanStore } from "@/stores/planStore.ts";
+import { usePlanState } from "@/composables/usePlanState.ts";
 
 const divStyle = {
   minHeight: "30vh",
@@ -43,42 +44,18 @@ function getWeekNumberInMonth(date) {
 
 const weeklyPlans = ref<WeeklyTargetType[]>([]);
 
-const editDialogVisible = ref(false);
-const editedTitle = ref("");
-const editedText = ref("");
-const editedColor = ref("#000000");
-const editedIndex = ref(null);
-const dialogState = ref("");
-const dialogHeader = computed(() => {
-  if (dialogState.value === "create") {
-    return "플랜 추가";
-  } else if (dialogState.value === "edit") {
-    return "플랜 정보";
-  }
-  return "";
-});
-
 const childrenPlans = ref<WeeklyTargetType[]>([]);
 
-function openDialog(
-  state: string,
-  plan: WeeklyTargetType | null = null,
-  index: number | null = null,
-) {
-  dialogState.value = state;
-  if (state === "create") {
-    editedTitle.value = "";
-    editedText.value = "";
-    editedColor.value = "#000000";
-    editedIndex.value = null;
-  } else if (state === "edit") {
-    editedTitle.value = plan.title;
-    editedText.value = plan.text;
-    editedColor.value = plan.color || "#000000";
-    editedIndex.value = index;
-  }
-  editDialogVisible.value = true;
-}
+const {
+  editDialogVisible,
+  editedTitle,
+  editedText,
+  editedColor,
+  editedIndex,
+  dialogState,
+  dialogHeader,
+  openDialog,
+} = usePlanState();
 
 function updatePlan() {
   if (editedTitle.value.trim()) {
@@ -103,16 +80,16 @@ function updatePlan() {
 
 onMounted(() => {
   weeklyPlans.value = [
-    { color: "#003213", title: "hi", text: "해보자" },
-    { color: "#633213", title: "im", text: "해보자12" },
+    { id: 11, color: "#003213", title: "hi", text: "해보자" },
+    { id: 12, color: "#633213", title: "im", text: "해보자12" },
   ];
   planStore.setCurrentWeeklyTargets(weeklyPlans.value);
 });
 
 watch(currentWeek, () => {
   weeklyPlans.value = [
-    { color: "#633213", title: "im", text: "해보자" },
-    { color: "#003213", title: "yonghan", text: "해보자2341243123" },
+    { id: 13, color: "#633213", title: "im", text: "해보자" },
+    { id: 14, color: "#003213", title: "yonghan", text: "해보자2341243123" },
   ];
   planStore.setCurrentWeeklyTargets(weeklyPlans.value);
 });
