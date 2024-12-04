@@ -2,6 +2,8 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useWeekStore } from "@/stores/weekStore.ts";
 import DailyPlan from "@/views/DailyPlan.vue";
+import { PlanService } from "@/service/PlanService.ts";
+import { PlanType } from "@/type/plan_type.ts";
 
 const divStyle = {
   height: "80vh",
@@ -34,29 +36,72 @@ const datesOfWeek = computed(() => {
   return dates;
 });
 
-// 일정 데이터 초기화
-const dailyPlans = ref<{ [key: string]: string[] }>({});
+const startDate = computed(() => {
+  return formatDate(startOfWeek.value);
+});
 
-// 각 날짜별로 일정 배열 초기화
-function initializePlans() {
-  datesOfWeek.value.forEach((date) => {
-    const key = date.toDateString();
-    if (!dailyPlans.value[key]) {
-      dailyPlans.value[key] = []; // 초기화
-    }
-  });
+const endDate = computed(() => {
+  const endOfWeekDate = new Date(startOfWeek.value);
+  endOfWeekDate.setDate(endOfWeekDate.getDate() + 6); // 주의 마지막 날 계산
+  return formatDate(endOfWeekDate);
+});
+
+const isLoaded = ref(false);
+
+// 일정 데이터
+const plans = ref<PlanType[]>([]);
+
+// 날짜별 플랜 매핑
+const dailyPlans = ref<{ [key: string]: PlanType[] }>({});
+
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = ("0" + (date.getMonth() + 1)).slice(-2); // 월은 0부터 시작하므로 +1
+  const day = ("0" + date.getDate()).slice(-2);
+  return `${year}-${month}-${day}`;
 }
 
-onMounted(() => {
-  // 컴포넌트가 마운트될 때 초기화
-  initializePlans();
+async function fetchPlans() {
+  const response = await PlanService.getInstance().getPlans(
+    startDate.value,
+    endDate.value,
+  );
+  plans.value = response.data;
+}
+
+// 플랜을 날짜별로 매핑하는 함수
+async function mapPlansToDates() {
+  // dailyPlans 초기화
+  dailyPlans.value = {};
+
+  // 각 날짜별로 빈 배열 초기화
+  datesOfWeek.value.forEach((date) => {
+    const key = date.toDateString();
+    dailyPlans.value[key] = [];
+  });
+  // 플랜들을 날짜별로 분류
+  plans.value.forEach((plan) => {
+    const planDate = new Date(plan.startDate);
+    const planDateKey = planDate.toDateString();
+
+    // 만약 해당 주의 날짜에 플랜이 있으면 추가
+    if (dailyPlans.value[planDateKey]) {
+      dailyPlans.value[planDateKey].push(plan);
+    }
+  });
+  isLoaded.value = true;
+}
+
+onMounted(async () => {
+  await fetchPlans();
+  mapPlansToDates();
 });
 
 // 주차 정보 변경 시 업데이트
 watch(
   () => weekStore.currentDate,
   () => {
-    initializePlans();
+    mapPlansToDates();
   },
 );
 
@@ -70,7 +115,7 @@ const today = computed(() => {
 <!-- src/components/WeeklyPlans.vue -->
 <template>
   <div :style="divStyle">
-    <div class="row h-100 no-gutters">
+    <div v-if="isLoaded" class="row h-100 no-gutters">
       <DailyPlan
         v-for="(day, index) in daysOfWeek"
         :key="index"
@@ -93,6 +138,4 @@ const today = computed(() => {
   padding-right: 0;
   padding-left: 0;
 }
-
-/* 필요한 경우 추가 스타일 */
 </style>

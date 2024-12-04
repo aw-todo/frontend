@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { defineProps, onMounted, ref } from "vue";
+import { computed, defineProps, onMounted, ref, watch } from "vue";
 import Button from "primevue/button";
 import { DailyPlanType } from "@/type/plan_type.ts";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
+import ColorPicker from "primevue/colorpicker";
+import Select from "primevue/select";
+import Checkbox from "primevue/checkbox";
+import { usePlanStore } from "@/stores/planStore.ts";
+import { PlanService } from "@/service/PlanService.ts";
 
 const props = defineProps({
   day: String,
@@ -12,7 +17,12 @@ const props = defineProps({
   isToday: Boolean,
 });
 
+const planStore = usePlanStore();
+
 const dailyPlans = ref<DailyPlanType[]>([]);
+
+const selectedTarget = ref({});
+const currentWeeklyTargets = computed(() => planStore.getCurrentWeeklyTargets);
 
 // 플랜 추가 함수
 const dialogVisible = ref(false);
@@ -32,9 +42,32 @@ function confirmAddPlan() {
   dialogVisible.value = false;
 }
 
+function onDialogHide() {
+  selectedTarget.value = {};
+}
+
 onMounted(() => {
   dailyPlans.value = props.plans;
+  console.log(dailyPlans.value);
 });
+
+watch(
+  dailyPlans,
+  (newPlans, oldPlan) => {
+    console.log("+#@#", newPlans);
+    newPlans.forEach(async (plan, idx) => {
+      console.log(plan.done, oldPlan[idx]?.done);
+      if (plan.done !== oldPlan[idx]?.done) {
+        const response = await PlanService.getInstance().updatePlanStatus(
+          plan.id,
+          plan.done,
+        );
+        console.log(response);
+      }
+    });
+  },
+  { deep: true },
+);
 </script>
 
 <template>
@@ -48,8 +81,18 @@ onMounted(() => {
     <div class="w-100 border-bottom mb-2"></div>
     <!-- 일정 목록 -->
     <ul class="list-unstyled w-100">
-      <li v-for="(plan, idx) in plans" :key="idx" class="text-center py-1 px-2">
-        {{ plan }}
+      <li
+        v-for="(plan, idx) in dailyPlans"
+        :key="idx"
+        class="text-center py-1 px-2 d-flex align-items-center"
+      >
+        <Checkbox
+          v-model="plan.done"
+          :inputId="'plan' + plan.id"
+          class="me-2"
+          :value="plan.title"
+        />
+        <label :for="'plan' + plan.id">{{ plan.title }} </label>
       </li>
     </ul>
     <!-- 플랜 추가 버튼 -->
@@ -57,7 +100,43 @@ onMounted(() => {
       플랜 추가
     </Button>
     <!-- 플랜 추가 다이얼로그 -->
-    <Dialog v-model:visible="dialogVisible" header="계획 추가" :modal="true">
+    <Dialog
+      v-model:visible="dialogVisible"
+      header="계획 추가"
+      :modal="true"
+      @hide="onDialogHide"
+    >
+      <div class="p-fluid pb-3">
+        <div class="field">
+          <label for="plan" class="me-2">구분</label>
+          <Select v-model="selectedTarget" :options="currentWeeklyTargets">
+            <template #value="slotProps">
+              <div
+                v-if="Object.keys(selectedTarget).length > 0"
+                class="d-flex align-items-center justify-content-start"
+              >
+                <ColorPicker
+                  class="me-2"
+                  v-model="slotProps.value.color"
+                  disabled
+                />
+                <div>{{ slotProps.value.title }}</div>
+              </div>
+              <span v-else>상위 목표 설정</span>
+            </template>
+            <template #option="slotProps">
+              <div class="d-flex align-items-center justify-content-start">
+                <ColorPicker
+                  class="me-2"
+                  v-model="slotProps.option.color"
+                  disabled
+                />
+                <div>{{ slotProps.option.title }}</div>
+              </div>
+            </template>
+          </Select>
+        </div>
+      </div>
       <div class="p-fluid">
         <div class="field">
           <label for="plan" class="me-2">내용</label>

@@ -7,6 +7,7 @@ import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import ColorPicker from "primevue/colorpicker";
 import { WeeklyTargetType } from "@/type/plan_type.ts";
+import { usePlanStore } from "@/stores/planStore.ts";
 
 const divStyle = {
   minHeight: "30vh",
@@ -14,6 +15,7 @@ const divStyle = {
 };
 
 const weekStore = useWeekStore();
+const planStore = usePlanStore();
 
 // 현재 주차 정보 가져오기
 const currentDate = computed(() => weekStore.currentDate);
@@ -42,8 +44,9 @@ function getWeekNumberInMonth(date) {
 const weeklyPlans = ref<WeeklyTargetType[]>([]);
 
 const editDialogVisible = ref(false);
+const editedTitle = ref("");
+const editedText = ref("");
 const editedColor = ref("#000000");
-const editedContent = ref("");
 const editedIndex = ref(null);
 const dialogState = ref("");
 const dialogHeader = computed(() => {
@@ -64,11 +67,13 @@ function openDialog(
 ) {
   dialogState.value = state;
   if (state === "create") {
-    editedContent.value = null;
+    editedTitle.value = "";
+    editedText.value = "";
     editedColor.value = "#000000";
     editedIndex.value = null;
   } else if (state === "edit") {
-    editedContent.value = plan.content;
+    editedTitle.value = plan.title;
+    editedText.value = plan.text;
     editedColor.value = plan.color || "#000000";
     editedIndex.value = index;
   }
@@ -76,9 +81,10 @@ function openDialog(
 }
 
 function updatePlan() {
-  if (editedContent.value.trim()) {
+  if (editedTitle.value.trim()) {
     const planData = {
-      content: editedContent.value.trim(),
+      title: editedTitle.value.trim(),
+      text: editedText.value.trim(),
       color: editedColor.value,
     };
     if (dialogState.value === "create") {
@@ -88,6 +94,7 @@ function updatePlan() {
       // 해당 인덱스의 플랜 수정
       weeklyPlans.value.splice(editedIndex.value, 1, planData);
     }
+    planStore.setCurrentWeeklyTargets(weeklyPlans.value);
     editDialogVisible.value = false;
   } else {
   }
@@ -96,16 +103,18 @@ function updatePlan() {
 
 onMounted(() => {
   weeklyPlans.value = [
-    { color: "#003213", content: "hi" },
-    { color: "#633213", content: "im" },
+    { color: "#003213", title: "hi", text: "해보자" },
+    { color: "#633213", title: "im", text: "해보자12" },
   ];
+  planStore.setCurrentWeeklyTargets(weeklyPlans.value);
 });
 
 watch(currentWeek, () => {
   weeklyPlans.value = [
-    { color: "#633213", content: "im" },
-    { color: "#003213", content: "yonghan" },
+    { color: "#633213", title: "im", text: "해보자" },
+    { color: "#003213", title: "yonghan", text: "해보자2341243123" },
   ];
+  planStore.setCurrentWeeklyTargets(weeklyPlans.value);
 });
 </script>
 
@@ -130,7 +139,7 @@ watch(currentWeek, () => {
         :key="index"
       >
         <ColorPicker v-model="plan.color" disabled />
-        {{ plan.content }}
+        {{ plan.title }}
         <button
           class="btn btn-link text-black p-0"
           @click="openDialog('edit', plan, index)"
@@ -154,14 +163,20 @@ watch(currentWeek, () => {
       </div>
       <div class="p-fluid pb-3">
         <div class="field">
+          <label for="title" class="me-2">제목 :</label>
+          <InputText id="title" v-model="editedTitle" />
+        </div>
+      </div>
+      <div class="p-fluid pb-3">
+        <div class="field">
           <label for="content" class="me-2">내용 :</label>
-          <InputText id="content" v-model="editedContent" autofocus />
+          <InputText id="content" v-model="editedText" />
         </div>
       </div>
       <div class="p-fluid">
         <div class="field">
           <label for="plan" class="me-2">하위 플랜</label>
-          <InputText id="plan" v-model="childrenPlans" autofocus />
+          <InputText id="plan" v-model="childrenPlans" />
         </div>
       </div>
       <template #footer>
