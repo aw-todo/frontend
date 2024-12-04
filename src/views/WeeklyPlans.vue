@@ -62,11 +62,16 @@ function formatDate(date) {
 }
 
 async function fetchPlans() {
-  const response = await PlanService.getInstance().getPlans(
+  // const response = await PlanService.getInstance().getPlansMock(
+  //   startDate.value,
+  //   endDate.value,
+  // );
+  const response = PlanService.getInstance().getPlansMock(
     startDate.value,
     endDate.value,
   );
-  plans.value = response.data;
+  console.log(response);
+  plans.value = response;
 }
 
 // 플랜을 날짜별로 매핑하는 함수

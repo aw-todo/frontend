@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineProps, onMounted, ref, watch } from "vue";
+import { computed, defineProps, onMounted, ref } from "vue";
 import Button from "primevue/button";
 import { DailyPlanType } from "@/type/plan_type.ts";
 import Dialog from "primevue/dialog";
@@ -9,6 +9,7 @@ import Select from "primevue/select";
 import Checkbox from "primevue/checkbox";
 import { usePlanStore } from "@/stores/planStore.ts";
 import { PlanService } from "@/service/PlanService.ts";
+import { HttpStatusCode } from "@/enum/httpStatusCode.ts";
 
 const props = defineProps({
   day: String,
@@ -46,28 +47,31 @@ function onDialogHide() {
   selectedTarget.value = {};
 }
 
+async function togglePlanDone(plan) {
+  const originalDone = plan.done;
+  try {
+    const response = PlanService.getInstance().updatePlanStatusMock(
+      plan.id,
+      plan.done,
+    );
+
+    if (response === HttpStatusCode.HTTP_200_OK) {
+      console.log(`Plan ${plan.id} updated successfully to ${!plan.done}`);
+      plan.done = !plan.done;
+    } else {
+      console.error("Failed to update plan, reverting change");
+      plan.done = originalDone; // 실패 시 원래 상태로 복구
+    }
+  } catch (error) {
+    console.error("Error updating plan:", error);
+    plan.done = originalDone; // 에러 발생 시 원래 상태로 복구
+  }
+}
+
 onMounted(() => {
   dailyPlans.value = props.plans;
   console.log(dailyPlans.value);
 });
-
-watch(
-  dailyPlans,
-  (newPlans, oldPlan) => {
-    console.log("+#@#", newPlans);
-    newPlans.forEach(async (plan, idx) => {
-      console.log(plan.done, oldPlan[idx]?.done);
-      if (plan.done !== oldPlan[idx]?.done) {
-        const response = await PlanService.getInstance().updatePlanStatus(
-          plan.id,
-          plan.done,
-        );
-        console.log(response);
-      }
-    });
-  },
-  { deep: true },
-);
 </script>
 
 <template>
@@ -84,15 +88,23 @@ watch(
       <li
         v-for="(plan, idx) in dailyPlans"
         :key="idx"
-        class="text-center py-1 px-2 d-flex align-items-center"
+        class="text-center py-1 px-2 d-flex align-items-center justify-content-between"
       >
         <Checkbox
-          v-model="plan.done"
+          :checked="plan.done"
+          @change="togglePlanDone(plan)"
           :inputId="'plan' + plan.id"
-          class="me-2"
-          :value="plan.title"
+          binary
         />
-        <label :for="'plan' + plan.id">{{ plan.title }} </label>
+        <label :class="{ 'checked-label': plan.done }" :for="'plan' + plan.id"
+          >{{ plan.title }}
+        </label>
+        <button
+          class="btn btn-link text-black p-0"
+          @click="openDialog('edit', plan, index)"
+        >
+          <i class="pi pi-info-circle"></i>
+        </button>
       </li>
     </ul>
     <!-- 플랜 추가 버튼 -->
@@ -194,5 +206,10 @@ watch(
 /* 오늘 날짜 강조 */
 .col.today-column {
   border: 3px solid #535bf2;
+}
+
+.checked-label {
+  text-decoration: line-through;
+  color: gray; /* 선택 시 색상 변경 (옵션) */
 }
 </style>
