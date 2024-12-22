@@ -11,7 +11,7 @@ const chartData = computed(() => {
     labels: ["완료", "미 완료"],
     datasets: [
       {
-        label: "주간 달성 비율",
+        label: "계획 달성 수",
         backgroundColor: ["#047857", "#A7F3D0"], // 예: Vue 테마 컬러
         data: [props.data.done, props.data.notDone],
       },

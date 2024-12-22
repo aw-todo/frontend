@@ -6,9 +6,11 @@ const props = defineProps({
   data: Array,
 });
 
+const weekend = ["일", "월", "화", "수", "목", "금", "토"];
+
 const chartData = computed(() => {
   return {
-    labels: props.data.map((item) => item.date),
+    labels: props.data.map((item, index) => `${item.date} (${weekend[index]})`),
     datasets: [
       {
         label: "완료 비율(%)",
@@ -26,6 +28,8 @@ const chartOptions = {
     y: {
       beginAtZero: true,
       stepSize: 1,
+      min: 0,
+      max: 100,
     },
   },
 };

@@ -1,16 +1,32 @@
 <script setup lang="ts">
-import { onMounted, onUpdated, ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useDateState } from "@/composables/useDateState.ts";
 import DailyStatistic from "@/views/components/DailyStatistic.vue";
 import WeeklyStatistic from "@/views/components/WeeklyStatistic.vue";
 import { StatisticService } from "@/service/statisticService.ts";
+import { StatisticType } from "@/type/statistic_type.ts";
+import { generateDateRange } from "@/utils/dateUtils.ts";
 
 const isLoaded = ref(false);
 
 const { startDate, endDate } = useDateState();
 
-const dailyStatisticData = ref([]);
+const dailyStatisticData = ref<StatisticType[]>([]);
 const weeklyStatisticData = ref({});
+
+const generateDefaultWeeklyData = async (
+  startDate: string,
+  endDate: string,
+): StatisticType[] => {
+  const dates = generateDateRange(startDate, endDate);
+  return dates.map((date) => ({
+    date,
+    total: 0,
+    done: 0,
+    notDone: 0,
+    ratio: 0,
+  }));
+};
 
 const getStatistics = async () => {
   await getDailyStatistic();
@@ -23,7 +39,7 @@ const getDailyStatistic = async () => {
     startDate.value,
     endDate.value,
   );
-  dailyStatisticData.value = response.data;
+  mergeWeeklyData(response.data);
 };
 
 const getWeeklyStatistic = async () => {
@@ -32,15 +48,43 @@ const getWeeklyStatistic = async () => {
     endDate.value,
   );
   weeklyStatisticData.value = response.data;
+  console.log(response.data);
+};
+
+const mergeWeeklyData = (fetchedData: StatisticType[]) => {
+  // 데이터를 빠르게 찾기 위한 맵 생성
+  const fetchedDataMap = new Map(fetchedData.map((item) => [item.date, item]));
+
+  // 기본 데이터에 백엔드 데이터를 덮어씀
+  const mergedData = dailyStatisticData.value.map((defaultItem) => {
+    const fetchedItem = fetchedDataMap.get(defaultItem.date);
+    if (fetchedItem) {
+      const ratio = fetchedItem.total
+        ? (fetchedItem.done / fetchedItem.total) * 100
+        : 0;
+      return { ...defaultItem, ...fetchedItem, ratio };
+    }
+    return defaultItem;
+  });
+
+  dailyStatisticData.value = mergedData;
 };
 
 onMounted(async () => {
+  dailyStatisticData.value = await generateDefaultWeeklyData(
+    startDate.value,
+    endDate.value,
+  );
   await getStatistics();
 });
 
 watch(
   () => startDate.value,
   async () => {
+    dailyStatisticData.value = await generateDefaultWeeklyData(
+      startDate.value,
+      endDate.value,
+    );
     await getStatistics();
   },
 );
@@ -52,7 +96,9 @@ watch(
     <div class="col-4 p-0">
       <div class="card h-100">
         <div class="card-body">
-          <h4 class="card-title">주간 달성 비율</h4>
+          <h4 class="card-title">
+            주간 계획 달성 비율 : {{ weeklyStatisticData.doneRatio * 100 }}%
+          </h4>
           <WeeklyStatistic :data="weeklyStatisticData" />
         </div>
       </div>
@@ -62,7 +108,7 @@ watch(
     <div class="col ms-3 p-0">
       <div class="card h-100">
         <div class="card-body">
-          <h4 class="card-title">요일별 달성 비율</h4>
+          <h4 class="card-title">요일별 계획 달성 비율</h4>
           <DailyStatistic :data="dailyStatisticData" />
         </div>
       </div>
