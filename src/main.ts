@@ -9,6 +9,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { createPinia } from "pinia";
 import axios from "axios";
 import ToastService from "primevue/toastservice";
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+} from "chart.js";
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -24,3 +34,13 @@ app
   .mount("#app");
 
 app.config.globalProperties.axios = axios;
+
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+);

@@ -8,7 +8,7 @@ import ColorPicker from "primevue/colorpicker";
 import { WeeklyTargetType } from "@/type/plan_type.ts";
 import { usePlanStore } from "@/stores/planStore.ts";
 import { usePlanState } from "@/composables/usePlanState.ts";
-import { PlanService } from "@/service/PlanService.ts";
+import { PlanService } from "@/service/planService.js";
 import { HttpStatusCode } from "@/enum/httpStatusCode.ts";
 import { useDateState } from "@/composables/useDateState.ts";
 import { useToast } from "primevue/usetoast";

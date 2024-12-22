@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { WeeklyTargetType } from "../type/plan_type.ts";
-import { PlanService } from "../service/PlanService.ts";
+import { PlanService } from "../service/planService.ts";
 import { HttpStatusCode } from "../enum/httpStatusCode.ts";
 import { useToast } from "primevue/usetoast";
 import { useWeekStore } from "../stores/weekStore.ts";
