@@ -8,7 +8,7 @@ import ColorPicker from "primevue/colorpicker";
 import Select from "primevue/select";
 import Checkbox from "primevue/checkbox";
 import { usePlanStore } from "@/stores/planStore.ts";
-import { PlanService } from "@/service/PlanService.ts";
+import { PlanService } from "@/service/planService.js";
 import { HttpStatusCode } from "@/enum/httpStatusCode.ts";
 import { usePlanState } from "@/composables/usePlanState.ts";
 import { useToast } from "primevue/usetoast";

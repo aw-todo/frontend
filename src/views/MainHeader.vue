@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useWeekStore } from "../stores/weekStore";
 import "primeicons/primeicons.css";
+import { useModeStore } from "@/stores/modeStore.ts";
 
 const weekStore = useWeekStore();
+const modeStore = useModeStore();
+
+const currentViewMode = computed(() => modeStore.getCurrentViewMode);
 
 const currentDate = computed(() => weekStore.currentDate);
 
@@ -34,6 +38,10 @@ function previousWeek() {
 function nextWeek() {
   weekStore.nextWeek();
 }
+
+onMounted(() => {
+  modeStore.initializeViewMode();
+});
 </script>
 
 <template>
@@ -47,15 +55,39 @@ function nextWeek() {
     <div class="d-flex align-items-center justify-content-center">
       <!-- 이전 주 버튼 -->
       <button class="btn btn-link text-white p-0" @click="previousWeek">
-        <i class="pi pi-angle-left"></i>
+        <i class="pi pi-angle-left fs-4"></i>
       </button>
 
       <!-- 제목 텍스트 -->
-      <h1 class="mx-3 my-0">TODO Planner</h1>
+      <h1 class="mx-3 my-0 display-4">TODO Planner</h1>
 
       <!-- 다음 주 버튼 -->
       <button class="btn btn-link text-white p-0" @click="nextWeek">
-        <i class="pi pi-angle-right"></i>
+        <i class="pi pi-angle-right fs-4"></i>
+      </button>
+    </div>
+
+    <!-- chart-bar 아이콘을 헤더 하단에 고정 -->
+    <div
+      v-if="currentViewMode === 'plan-view'"
+      class="position-absolute bottom-0 start-50 translate-middle-x p-3"
+    >
+      <button
+        class="btn btn-link text-white p-0"
+        @click="modeStore.toggleCurrentViewMode"
+      >
+        <i class="pi pi-chart-bar fs-4"></i>
+      </button>
+    </div>
+    <div
+      v-else-if="currentViewMode === 'statistic-view'"
+      class="position-absolute bottom-0 start-50 translate-middle-x p-3"
+    >
+      <button
+        class="btn btn-link text-white p-0"
+        @click="modeStore.toggleCurrentViewMode"
+      >
+        <i class="pi pi-calendar-minus fs-4"></i>
       </button>
     </div>
   </header>
@@ -69,11 +101,11 @@ function nextWeek() {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: relative;
+  position: relative; /* position-absolute를 정상적으로 동작시키기 위해 필요 */
 }
 
 .date-info {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
 }
 
 h1 {
