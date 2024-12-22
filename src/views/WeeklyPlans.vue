@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import DailyPlan from "@/views/DailyPlan.vue";
-import { PlanService } from "@/service/PlanService.ts";
+import { PlanService } from "@/service/planService.js";
 import { PlanType } from "@/type/plan_type.ts";
 import { useDateState } from "@/composables/useDateState.ts";
 import { useWeekStore } from "@/stores/weekStore.ts";
 
 const divStyle = {
-  height: "80vh",
-  overflowY: "auto",
+  height: "78vh",
 };
 
 const { weekStore, startOfWeek, startDate, endDate } = useDateState();
